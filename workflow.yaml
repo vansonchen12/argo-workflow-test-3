@@ -1,0 +1,58 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: vanson3-workflow-template
+  generateName: vanson3-workflow-
+  namespace: default
+spec:
+  entrypoint: pipeline
+  arguments:
+    parameters:
+      - name: tag
+  templates:
+    - name: pipeline
+      steps:
+        - - name: build-java
+            template: build-java
+          #- name: build-image
+          #  template: build-image
+          #  arguments:
+          #    parameters:
+          #      - name: tag
+          #        value: "{{workflow.parameters.tag}}"
+
+    - name: build-java
+      container:
+        image: maven:3.6.3-openjdk-17-slim
+        command: [sh, -c]
+        args:
+          - |
+            echo "3333333"
+        volumeMounts:
+         - name: build-script
+           mountPath: /scripts
+
+    #- name: build-image
+    #  inputs:
+    #    parameters:
+    #      - name: tag
+    #  container:
+    #    image: plugins/docker
+    #    env:
+    #      - name: PLUGIN_REPO
+    #        value: vansonchen/java-test
+    #      - name: PLUGIN_TAGS
+    #        value: "{{inputs.parameters.tag}}"
+    #      - name: PLUGIN_USERNAME
+    #        value: vansonchen
+    #      - name: PLUGIN_PASSWORD
+    #        value: "@Dmin123!"
+    #    command: [sh, -c]
+    #    args: ["echo 'Simulate docker plugin push' && /bin/drone-docker"]
+
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: build-script 
+      configMap:
+        name: build-script
